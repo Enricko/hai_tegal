@@ -12,40 +12,72 @@ ListMapBloc otherPostAllLMB = ListMapBloc();
 ListMapBloc nearestPostAllLMB = ListMapBloc();
 ListMapBloc allPostChoose = ListMapBloc();
 
-choosePostIndex(Map data){
+void choosePostIndex(Map data) {
   postIndexMB.changeVal(data);
 }
 
-// loadImgPostIndex(postId)async{
-//   imgPostAllLMB.removeAll();
-//   var data = await Api().getImgPost('', postId, '20', '');
-//   imgPostAllLMB.addAll(data['data']);
-// }
+Future<void> loadImgPostIndex(String postId) async {
+  imgPostAllLMB.removeAll();
+  final response = await Api().getImgPost('', postId, '20', '');
+  
+  if (response.success) {
+    imgPostAllLMB.addAll(response.data);
+  } else {
+    print('Failed to load post images: ${response.message}');
+  }
+}
 
-loadReviewPostIndex(postId)async{
+Future<void> loadReviewPostIndex(String postId) async {
   reviewPostAllLMB.removeAll();
-  var data = await Api().getComment(postId);
-  reviewPostAllLMB.addAll(data['data']['data']);
-  reviewSummaryPostAllLMB.changeVal(data['data']['rating']);
-  averageReviewCB.changeVal(data['data']['average']);
+  final response = await Api().getComment(postId);
+  
+  if (response.success) {
+    // Check if the data structure contains nested 'data' and 'rating' fields
+    if (response.data != null && 
+        response.data['data'] != null && 
+        response.data['rating'] != null &&
+        response.data['average'] != null) {
+      
+      reviewPostAllLMB.addAll(response.data['data']);
+      reviewSummaryPostAllLMB.changeVal(response.data['rating']);
+      averageReviewCB.changeVal(response.data['average']);
+    } else {
+      print('Review data structure is not as expected');
+    }
+  } else {
+    print('Failed to load reviews: ${response.message}');
+  }
 }
 
-// loadVenuePostIndex(postId)async{
-//   venuePostAllLMB.removeAll();
-//   var data = await Api().getVenuePost('', postId);
-//   venuePostAllLMB.addAll(data['data']);
-// }
+Future<void> loadVenuePostIndex(String postId) async {
+  venuePostAllLMB.removeAll();
+  final response = await Api().getVenuePost('', postId);
+  
+  if (response.success) {
+    venuePostAllLMB.addAll(response.data);
+  } else {
+    print('Failed to load venue post: ${response.message}');
+  }
+}
 
-loadNearestPostIndex(lat, long, cat, {radius = 0})async{
+Future<void> loadNearestPostIndex(dynamic lat, dynamic long, String cat, {dynamic radius = 0}) async {
   nearestPostAllLMB.removeAll();
-    var data = await Api().getNearest(lat, long, cat, radius);
-    nearestPostAllLMB.addAll(data['data']);
-    print(nearestPostAllLMB.state.listDataMap);
- 
+  final response = await Api().getNearest(lat, long, cat, radius);
+  
+  if (response.success) {
+    nearestPostAllLMB.addAll(response.data);
+  } else {
+    print('Failed to load nearest posts: ${response.message}');
+  }
 }
 
-void loadDetPost(key, categoryId, limit, postId)async{
+Future<void> loadDetPost(String key, String categoryId, String limit, String postId) async {
   allPostChoose.removeAll();
-  var data = await Api().getPost(key, categoryId, limit, postId);
-  allPostChoose.addAll(data['data']);
+  final response = await Api().getPost(key, categoryId, limit, postId);
+  
+  if (response.success) {
+    allPostChoose.addAll(response.data);
+  } else {
+    print('Failed to load post details: ${response.message}');
+  }
 }

@@ -15,56 +15,88 @@ ListMapBloc postHighestAll = ListMapBloc();
 ListMapBloc postFeaturedTripAll = ListMapBloc();
 CustomBloc latitudeUser = CustomBloc();
 CustomBloc longitudeUser = CustomBloc();
- MapBloc datacat = MapBloc();
+MapBloc datacat = MapBloc();
 
-chooseCategoryIndex(Map data){
+void chooseCategoryIndex(Map data) {
   categoryIndex.changeVal(data);
 }
 
-loadSubCategory(key, parentId)async{
+Future<void> loadSubCategory(String key, String parentId) async {
   subCategoryAll.removeAll();
-  var data = await Api().getCategory(key, parentId);
-  subCategoryAll.addAll(data['data']);
+  final response = await Api().getCategory(key, parentId);
+  
+  if (response.success) {
+    subCategoryAll.addAll(response.data);
+  } else {
+    print('Failed to load sub-categories: ${response.message}');
+  }
 }
 
-loadPostAllCategory(context, key, categoyId, limit, postId)async{
+Future<void> loadPostAllCategory(BuildContext context, String key, String categoryId, String limit, String postId) async {
   ModalContainer(context, 'Loading..', CircularProgressIndicator(), []);
   postSearchAll.removeAll();
-  var data = await Api().getPost(key, categoyId, limit, postId);
-  if(data['res'] == true){
-    postSearchAll.addAll(data['data']);
-    Navigator.pop(context);
-  }else{
-    AlertText(context, WAWarningColor, WALightColor, 'Data tidak ditemukan');
-    Navigator.pop(context);
-
-  }
   
+  final response = await Api().getPost(key, categoryId, limit, postId);
+  
+  // Check if context is still mounted before manipulating UI
+  if (!context.mounted) return;
+  
+  Navigator.pop(context); // Close loading dialog
+  
+  if (response.success) {
+    postSearchAll.addAll(response.data);
+  } else {
+    AlertText(context, WAWarningColor, WALightColor, 'Data tidak ditemukan');
+  }
 }
 
-loadPostAllCategoryInner(key, categoyId, limit, postId)async{
+Future<void> loadPostAllCategoryInner(String key, String categoryId, String limit, String postId) async {
   postSearchAll.removeAll();
-  var data = await Api().getPost(key, categoyId, limit, postId);
-    postSearchAll.addAll(data['data']);
-} 
+  final response = await Api().getPost(key, categoryId, limit, postId);
+  
+  if (response.success) {
+    postSearchAll.addAll(response.data);
+  } else {
+    print('Failed to load posts: ${response.message}');
+  }
+}
 
-loadPostNearestUser(parentCatId, {radius = 0})async{
+Future<void> loadPostNearestUser(String parentCatId, {dynamic radius = 0}) async {
   postNearestAll.removeAll();
-  var data = await Api().getNearest(latitudeUser.state, longitudeUser.state, parentCatId, radius);
-    postNearestAll.addAll(data['data']);
-} 
+  final response = await Api().getNearest(
+    latitudeUser.state, 
+    longitudeUser.state, 
+    parentCatId, 
+    radius
+  );
+  
+  if (response.success) {
+    postNearestAll.addAll(response.data);
+  } else {
+    print('Failed to load nearest posts: ${response.message}');
+  }
+}
 
-loadPostHighest(parentCatId)async{
+Future<void> loadPostHighest(String parentCatId) async {
   postHighestAll.removeAll();
-  var data = await Api().getHighest(parentCatId);
-    postHighestAll.addAll(data['data']);
-} 
+  final response = await Api().getHighest(parentCatId);
+  
+  if (response.success) {
+    postHighestAll.addAll(response.data);
+  } else {
+    print('Failed to load highest posts: ${response.message}');
+  }
+}
 
-loadPostFeatured()async{
+Future<void> loadPostFeatured() async {
   postFeaturedTripAll.removeAll();
   categoryAllLMB.findMap('category_name', 'Featured Trip', datacat);
-  var data = await Api().getPost('', datacat.state['category_id'], '', '0');
-    postFeaturedTripAll.addAll(data['data']);
- 
-} 
-
+  
+  final response = await Api().getPost('', datacat.state['category_id'], '', '0');
+  
+  if (response.success) {
+    postFeaturedTripAll.addAll(response.data);
+  } else {
+    print('Failed to load featured posts: ${response.message}');
+  }
+}

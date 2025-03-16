@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hai_tegal/service/api.dart';
 import 'package:hai_tegal/service/route.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -9,10 +10,15 @@ import 'bloc/list_bloc.dart';
 import 'bloc/list_map_bloc.dart';
 import 'bloc/map_bloc.dart';
 
+void main() async {
+  // Ensure Flutter bindings are initialized
+  WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize the API cache service
+  final api = Api();
+  await api.initCache();
 
-void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

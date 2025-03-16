@@ -15,7 +15,7 @@ class CategoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if(subCategoryAll.state.listDataMap.isEmpty){
-      loadSubCategory(key, categoryIndex.state['category_id']);
+      loadSubCategory('', categoryIndex.state['category_id']);
     }
 
     if(postNearestAll.state.listDataMap.isEmpty){
@@ -33,18 +33,18 @@ class CategoryScreen extends StatelessWidget {
       loadPostFeatured();
     }
 
-    void _refresh(){
-       loadSubCategory('', categoryIndex.state['category_id']);
-      //  loadPostAllCategory(context, '',categoryIndex.state['category_id'], '', '');
-       loadPostNearestUser(categoryIndex.state['category_id']);
-       if(postNearestAll.state.listDataMap.isEmpty){
-        loadPostNearestUser('');
-       }
-       loadPostHighest('');
-       loadPostFeatured();
+    void _refresh() async {
+      await loadSubCategory('', categoryIndex.state['category_id']);
+      await loadPostNearestUser(categoryIndex.state['category_id']);
+      if(postNearestAll.state.listDataMap.isEmpty){
+        await loadPostNearestUser('');
+      }
+      await loadPostHighest(categoryIndex.state['category_id']);
+      await loadPostFeatured();
     }
+    
     return Scaffold(
-    body: RefreshIndicator(onRefresh: ()async{
+    body: RefreshIndicator(onRefresh: () async {
       _refresh();
     }, 
     child: Stack(children: [
